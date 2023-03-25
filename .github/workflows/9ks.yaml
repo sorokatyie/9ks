@@ -1,54 +1,36 @@
-name: Deploy-Kubernetes-Clusters
-
-on: push
-
+name: Deploy minikube and Kind
+on:
+  - push
+  - pull_request
 jobs:
-  kind-deploy:
+  deploy_minikube:
     runs-on: ubuntu-latest
-
+    name: deploy to minikube
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Install KinD
+    - name: Start minikube
+      uses: medyagh/setup-minikube@master
+    - name: checkinfo
       run: |
-        curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.10.0/kind-linux-amd64
-        chmod +x ./kind
-        sudo mv ./kind /usr/local/bin/kind
-
-    - name: Spin up KinD cluster
-      run: kind create cluster --name kind-test --config 9ks.yaml
-
-    - name: Get cluster info
-      run: kubectl cluster-info --context kind-kind-test
-
-    - name: Display nodes
-      run: kubectl get nodes
-
-    - name: Delete cluster
-      run: kind delete cluster --name kind-test
-
-  minikube-deploy:
+       echo -e "Nods:\n$(kubectl get pods -A)" >> output_minikube.log 
+       echo -e "Minikube version:\n$(kubectl version --short)" >> output_minikube.log
+    - name: Upload report
+      uses: actions/upload-artifact@v3
+      with:
+          path: output_minikube.log
+             
+  deploy_KinD:
     runs-on: ubuntu-latest
-
+    name: deploy to KinD
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Install Minikube
+    - name: Start KinD
+      uses: engineerd/setup-kind@v0.5.0
+      with:
+        version: "v0.17.0"
+    - name: checkinfo
       run: |
-        curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-        chmod +x minikube
-        sudo mv minikube /usr/local/bin/
-
-    - name: Start Minikube
-      run: minikube start
-
-    - name: Get cluster info
-      run: kubectl cluster-info
-
-    - name: Display nodes
-      run: kubectl get nodes
-
-    - name: Stop Minikube
-      run: minikube stop
+       echo -e "Nods:\n$(kubectl get pods -A)" >> output_kind.log
+       echo -e "KinD version:\n$(kubectl version --short)" >> output_kind.log
+    - name: Upload report
+      uses: actions/upload-artifact@v3
+      with:
+          path: output_kind.log
