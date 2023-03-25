@@ -1,32 +1,41 @@
-name: KinD Cluster
-on: [push]
+name: Test Clusters
+
+on: push
 
 jobs:
   kind:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Install Dependencies
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Setup KinD
+      uses: engineerd/setup-kind@v0.6.0
+      with:
+        version: v1.19.7
+        nodes: 3
       run: |
-        sudo apt-get install -y curl
-        curl -Lo kind https://kind.sigs.k8s.io/dl/v0.11.1/kind-linux-amd64
-        chmod +x kind
-        sudo mv kind /usr/local/bin/
-    - name: Create KinD Cluster
+        kind create cluster --config=./kind-config.yaml
+
+    - name: Check KinD
       run: |
-        kind create cluster --image=kindest/node:v1.21.1 --name=kind-cluster
-        kubectl cluster-info --context kind-kind-cluster
         kubectl get nodes
-    - uses: actions/checkout@v2
-    - name: Install Dependencies
+
+  minikube:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Setup Minikube
+      uses: hashicorp/setup-minikube@v1.0.0
+      with:
+        kubernetes_version: v1.19.7
+        memory: 4g
+        nodes: 3
       run: |
-        sudo apt-get install -y curl
-        sudo apt-get install -y conntrack
-        curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-        chmod +x minikube
-        sudo mv minikube /usr/local/bin/
-    - name: Create Minikube Cluster
+        minikube start
+
+    - name: Check Minikube
       run: |
-        sudo minikube start --driver=none --kubernetes-version=v1.21.1
-        sudo kubectl cluster-info
-        sudo kubectl get nodes
+        kubectl get nodes
