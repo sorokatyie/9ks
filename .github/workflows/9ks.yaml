@@ -9,7 +9,7 @@ jobs:
     name: deploy to minikube
     steps:
     - name: Start minikube
-      uses: medyagh/setup-minikube@v1.0.0    # Switch to latest release instead of master
+      uses: medyagh/setup-minikube@master    # Switch to latest release instead of master
     - name: checkinfo
       run: |
        echo -e "Nods:\n$(kubectl get pods -A)" >> output_minikube.log
