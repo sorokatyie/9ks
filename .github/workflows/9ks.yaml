@@ -17,7 +17,7 @@ jobs:
         sudo mv ./kind /usr/local/bin/kind
 
     - name: Spin up KinD cluster
-      run: kind create cluster --name kind-test --config kind-config.yaml
+      run: kind create cluster --name kind-test --config pod.yaml
 
     - name: Get cluster info
       run: kubectl cluster-info --context kind-kind-test
